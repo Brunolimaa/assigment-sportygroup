@@ -6,6 +6,7 @@ This is a simple backend service built using Java 17, Spring Boot 3 and Kafka as
 - **Back-end**: The backend is built using Java 17.
 - **API**: The service is built using Spring Boot 3
 - **Message**: The message broker is built using kafka to publish messages to a topic
+- **Database**: H2 In-Memory Database
 
 <div style="background-color: white; padding: 15px; border-radius: 8px;">
     <img src="./sportygroup-fundo.svg" alt="Diagrama de Sequência" width="100%">
@@ -24,7 +25,7 @@ This is a simple backend service built using Java 17, Spring Boot 3 and Kafka as
 Clone this repository to your local machine:
 
 ```
-git clone https://github.com/Brunolimaa/sportygroup.git
+git clone https://github.com/Brunolimaa/assigment-sportygroup.git
 cd tracker
 
 git checkout master
@@ -32,8 +33,7 @@ git checkout master
 
 or click in download button in the top right corner of this page to download the project as a zip file.
 
-![image](https://github.com/user-attachments/assets/b27bac5d-4d9c-4f01-bca2-9653f8387739)
-
+<img width="438" height="360" alt="image" src="https://github.com/user-attachments/assets/e6bca8cd-d059-41e1-89b4-951b123c14a6" />
 
 
 #### 2. Docker Compose Setup
@@ -57,19 +57,42 @@ http://localhost:8080/swagger-ui/index.html
 ![img.png](img.png)
 
 #### 2. CURL in case to test in another platform such as Postman
-```
-curl --location 'http://localhost:8080/v1/events/status' \
---header 'Content-Type: application/json' \
---data '{
-           "eventId": "12348",
-           "status": "LIVE"
-         }'
-```
-![image](https://github.com/user-attachments/assets/63f7f7bb-1db5-454f-a579-e7e65eac2755)
 
-request body information
+- **Create a bet at Database**
+```
+curl -X 'POST' \
+  'http://localhost:8080/api/bets' \
+  -H 'accept: */*' \
+  -H 'Content-Type: application/json' \
+  -d '{
+  "betId": "bet-998877",
+  "userId": "user-456",
+  "eventId": "event-123",
+  "eventMarketId": "market-001",
+  "eventWinnerId": "winner-789",
+  "betAmount": 50.00
+}'
+```
 
-![image](https://github.com/user-attachments/assets/ddde87be-37fc-4c74-800e-1864c8b7048a)
+- **List bets from Database**
+```
+curl -X 'GET' \
+  'http://localhost:8080/api/bets' \
+  -H 'accept: */*'
+```
+
+- **Create a event-outcomes**
+```
+curl -X 'POST' \
+  'http://localhost:8080/api/event-outcomes' \
+  -H 'accept: */*' \
+  -H 'Content-Type: application/json' \
+  -d '{
+  "eventId": "event-123",
+  "eventName": "Final da Champions League: Real Madrid vs Dortmund",
+  "eventWinnerId": "winner-789"
+}'
+```
 
 ##### 2.1 Unit tests and Integration tests
 You can run the unit tests and integration tests using the following command:
@@ -78,7 +101,7 @@ You can run the unit tests and integration tests using the following command:
     mvn clean test
 ```
 
-![Screenshot from 2025-06-09 14-51-14](https://github.com/user-attachments/assets/14288581-c159-4373-94b0-e0e4cfb2a35d)
+<img width="1169" height="474" alt="image" src="https://github.com/user-attachments/assets/7df28373-65c4-4c5c-bf19-3380632063c6" />
 
 
 #### 3. Logs from API - through docker 
@@ -86,21 +109,19 @@ You can run the unit tests and integration tests using the following command:
 Execute this command to follow in real-time logs from api 
 
 ```
-docker compose logs -f tracker-app
+docker logs -f bet-app
 
 ```
 
 ###### example:
 
 ```
-2025-06-08T21:23:27.731Z  INFO 1 --- [nio-8080-exec-8] c.s.t.i.scheduler.EventSchedulerService  : Starting tracking for eventId: 12345
-2025-06-08T21:23:27.743Z  INFO 1 --- [ad | producer-1] c.s.t.i.messaging.KafkaMessagePublisher  : Message sent successfully: {"eventId":"12345","currentScore":"1:1"}
-2025-06-08T21:23:37.753Z  INFO 1 --- [ad | producer-1] c.s.t.i.messaging.KafkaMessagePublisher  : Message sent successfully: {"eventId":"12345","currentScore":"1:0"}
-2025-06-08T21:23:47.763Z  INFO 1 --- [ad | producer-1] c.s.t.i.messaging.KafkaMessagePublisher  : Message sent successfully: {"eventId":"12345","currentScore":"3:1"}
-2025-06-08T21:23:57.754Z  INFO 1 --- [ad | producer-1] c.s.t.i.messaging.KafkaMessagePublisher  : Message sent successfully: {"eventId":"12345","currentScore":"1:2"}
-2025-06-08T21:24:07.753Z  INFO 1 --- [ad | producer-1] c.s.t.i.messaging.KafkaMessagePublisher  : Message sent successfully: {"eventId":"12345","currentScore":"1:3"}
-2025-06-08T21:24:17.748Z  INFO 1 --- [ad | producer-1] c.s.t.i.messaging.KafkaMessagePublisher  : Message sent successfully: {"eventId":"12345","currentScore":"2:4"}
-2025-06-08T21:24:27.757Z  INFO 1 --- [ad | producer-1] c.s.t.i.messaging.KafkaMessagePublisher  : Message sent successfully: {"eventId":"12345","currentScore":"3:3"}
+2026-01-30T21:42:48.232Z  INFO 1 --- [bet] [ bet-producer-1] org.apache.kafka.clients.Metadata        : [Producer clientId=bet-producer-1] Cluster ID: Rq7a2WgbQJOeCMwaId31hA
+2026-01-30T21:42:48.238Z  INFO 1 --- [bet] [ bet-producer-1] o.a.k.c.p.internals.TransactionManager   : [Producer clientId=bet-producer-1] ProducerId set to 6 with epoch 0
+2026-01-30T21:42:48.380Z  INFO 1 --- [bet] [-consumer-0-C-1] c.s.b.i.m.EventOutcomesKafkaConsumer     : Received event outcome from Kafka: topic=event-outcomes, offset=10, payload={"eventId":"event-123","eventName":"Final da Champions League: Real Madrid vs Dortmund","eventWinnerId":"winner-789"}
+2026-01-30T21:42:49.171Z  INFO 1 --- [bet] [-consumer-0-C-1] c.s.b.a.s.HandleEventOutcomeService      : [Settlement] Processing results for event event-123: 1 total bets, 1 winners found.
+2026-01-30T21:42:49.175Z  INFO 1 --- [bet] [-consumer-0-C-1] .b.i.m.MockRocketMQBetSettlementProducer : [Mock RocketMQ] Would send to topic 'bet-settlements': {"betId":"bet-998877","userId":"user-456","eventId":"event-123","eventMarketId":"market-001","eventWinnerId":"winner-789","betAmount":"50.00","won":true}
+
 ```
 
 #### 4. UI for Apache Kafka
@@ -137,8 +158,8 @@ This approach helps to keep the code standardized, easier to understand, and mor
 
 ## AI-assisted
 
-To help with faster development, AI assistance was used—specifically GitHub Copilot—to create basic unit tests and generate descriptions for each class, helping to maintain organization and standards.
-I was responsible for reviewing and validating each piece of code and test generated by the AI, as well as improving the class descriptions when necessary.
-Copilot also helped me with some basic configurations, such as the Docker Compose setup.
+To speed up the development process, I utilized GitHub Copilot to generate basic unit tests and initial class descriptions. This approach was essential for maintaining high coding standards and keeping the project well-organized.
+
+My role involved reviewing and validating every line of code and test produced by the AI to ensure accuracy. Additionally, I refined the class descriptions whenever they needed more detail or clarity. Beyond coding, Copilot assisted me with essential environment configurations, such as setting up Docker Compose.
 
 
