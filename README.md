@@ -26,9 +26,7 @@ Clone this repository to your local machine:
 
 ```
 git clone https://github.com/Brunolimaa/assigment-sportygroup.git
-cd tracker
 
-git checkout master
 ```
 
 or click in download button in the top right corner of this page to download the project as a zip file.
