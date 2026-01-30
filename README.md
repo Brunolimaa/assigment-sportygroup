@@ -1,0 +1,144 @@
+<img src="https://github.com/user-attachments/assets/cfcaeef7-6607-4dc3-b8ac-56383f12368e" height="50"/>
+
+This is a simple backend service built using Java 17, Spring Boot 3 and Kafka as a message broker.
+
+
+- **Back-end**: The backend is built using Java 17.
+- **API**: The service is built using Spring Boot 3
+- **Message**: The message broker is built using kafka to publish messages to a topic
+
+<div style="background-color: white; padding: 15px; border-radius: 8px;">
+    <img src="./sportygroup-fundo.svg" alt="Diagrama de Sequência" width="100%">
+</div>
+
+## Requirements
+
+- **Docker**: <img src="https://github.com/user-attachments/assets/908265ca-abc9-4e0b-a613-f9bd89d72920" height="40"/>
+- **Docker Compose**: <img src="https://github.com/user-attachments/assets/e24be3c0-dedd-4ba4-b4fc-59093559aa59" height="40"/>
+ 
+
+### Getting Started
+
+#### 1. Clone the Repository
+
+Clone this repository to your local machine:
+
+```
+git clone https://github.com/Brunolimaa/sportygroup.git
+cd tracker
+
+git checkout master
+```
+
+or click in download button in the top right corner of this page to download the project as a zip file.
+
+![image](https://github.com/user-attachments/assets/b27bac5d-4d9c-4f01-bca2-9653f8387739)
+
+
+
+#### 2. Docker Compose Setup
+
+The project was set up in dockerfile and docker-compose.yml, so you can run the project using Docker Compose.
+
+Doing this the MAVEN build will be executed automatically, and the application will be started in a container.
+
+##### Start the Docker Containers
+
+```
+docker-compose up --build 
+```
+## Testing API - Sportygroup
+
+#### 1. Access the Swagger documentation 
+
+```
+http://localhost:8080/swagger-ui/index.html
+```
+![img.png](img.png)
+
+#### 2. CURL in case to test in another platform such as Postman
+```
+curl --location 'http://localhost:8080/v1/events/status' \
+--header 'Content-Type: application/json' \
+--data '{
+           "eventId": "12348",
+           "status": "LIVE"
+         }'
+```
+![image](https://github.com/user-attachments/assets/63f7f7bb-1db5-454f-a579-e7e65eac2755)
+
+request body information
+
+![image](https://github.com/user-attachments/assets/ddde87be-37fc-4c74-800e-1864c8b7048a)
+
+##### 2.1 Unit tests and Integration tests
+You can run the unit tests and integration tests using the following command:
+
+```
+    mvn clean test
+```
+
+![Screenshot from 2025-06-09 14-51-14](https://github.com/user-attachments/assets/14288581-c159-4373-94b0-e0e4cfb2a35d)
+
+
+#### 3. Logs from API - through docker 
+
+Execute this command to follow in real-time logs from api 
+
+```
+docker compose logs -f tracker-app
+
+```
+
+###### example:
+
+```
+2025-06-08T21:23:27.731Z  INFO 1 --- [nio-8080-exec-8] c.s.t.i.scheduler.EventSchedulerService  : Starting tracking for eventId: 12345
+2025-06-08T21:23:27.743Z  INFO 1 --- [ad | producer-1] c.s.t.i.messaging.KafkaMessagePublisher  : Message sent successfully: {"eventId":"12345","currentScore":"1:1"}
+2025-06-08T21:23:37.753Z  INFO 1 --- [ad | producer-1] c.s.t.i.messaging.KafkaMessagePublisher  : Message sent successfully: {"eventId":"12345","currentScore":"1:0"}
+2025-06-08T21:23:47.763Z  INFO 1 --- [ad | producer-1] c.s.t.i.messaging.KafkaMessagePublisher  : Message sent successfully: {"eventId":"12345","currentScore":"3:1"}
+2025-06-08T21:23:57.754Z  INFO 1 --- [ad | producer-1] c.s.t.i.messaging.KafkaMessagePublisher  : Message sent successfully: {"eventId":"12345","currentScore":"1:2"}
+2025-06-08T21:24:07.753Z  INFO 1 --- [ad | producer-1] c.s.t.i.messaging.KafkaMessagePublisher  : Message sent successfully: {"eventId":"12345","currentScore":"1:3"}
+2025-06-08T21:24:17.748Z  INFO 1 --- [ad | producer-1] c.s.t.i.messaging.KafkaMessagePublisher  : Message sent successfully: {"eventId":"12345","currentScore":"2:4"}
+2025-06-08T21:24:27.757Z  INFO 1 --- [ad | producer-1] c.s.t.i.messaging.KafkaMessagePublisher  : Message sent successfully: {"eventId":"12345","currentScore":"3:3"}
+```
+
+#### 4. UI for Apache Kafka
+
+To access the UI you need to access this link: 
+
+```
+http://localhost:8081/
+```
+To see the messages you can find them in these menus: 
+
+##### Topics > Topic Name "sports-live-ipdates" > Messages
+
+![img_1.png](img_1.png)
+
+## Design decisions
+
+It’s a simple project; however, I decided to use Clean Architecture as the architectural approach.
+By using this architecture, it’s possible to isolate the domain and application code, applying the Open/Closed Principle more easily.
+For this project, it would have been simpler, of course, to use an MVC architecture, but I chose Clean Architecture to better organize the layers and responsibilities.
+
+- According to this image, we can see how this architecture works 
+
+![image](https://github.com/user-attachments/assets/e540df2d-a39d-4103-9074-3e19ba0d5687)
+
+
+
+To handle centralized exceptions, I used AOP (Aspect-Oriented Programming) through @ControllerAdvice or @ExceptionHandler.
+
+Another design decision was applying Dependency Inversion, by defining interfaces as contracts to avoid direct dependencies on concrete classes.
+
+I also centralized the entire OpenAPI documentation in an interface, mainly to apply the Single Responsibility Principle.
+This approach helps to keep the code standardized, easier to understand, and more maintainable.
+
+## AI-assisted
+
+To help with faster development, AI assistance was used—specifically GitHub Copilot—to create basic unit tests and generate descriptions for each class, helping to maintain organization and standards.
+I was responsible for reviewing and validating each piece of code and test generated by the AI, as well as improving the class descriptions when necessary.
+Copilot also helped me with some basic configurations, such as the Docker Compose setup.
+
+
