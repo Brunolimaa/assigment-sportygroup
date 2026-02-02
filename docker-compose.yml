@@ -1,6 +1,5 @@
-version: '3.8'
-
 services:
+  # --- KAFKA STACK ---
   zookeeper:
     image: confluentinc/cp-zookeeper:7.2.1
     container_name: zookeeper
@@ -37,6 +36,60 @@ services:
     depends_on:
       - kafka
 
+  # --- ROCKETMQ STACK ---
+  # RocketMQ 5.x requires NameServer first, then Broker with --enable-proxy
+  namesrv:
+    image: apache/rocketmq:5.1.4
+    container_name: rmqnamesrv
+    ports:
+      - "9876:9876"
+    command: sh mqnamesrv
+    # Optional: reduce memory for dev (default can be 4g and OOM on small machines)
+    environment:
+      - JAVA_OPT_EXT=-Xms256m -Xmx256m
+
+  broker:
+    image: apache/rocketmq:5.1.4
+    container_name: rmqbroker
+    depends_on:
+      - namesrv
+    ports:
+      - "10911:10911"
+      - "10909:10909"
+      - "10912:10912"
+      # Proxy ports (RocketMQ 5.x): map to 10980/10981 to avoid conflict with app on 8080
+      - "10980:8080"
+      - "10981:8081"
+    environment:
+      - NAMESRV_ADDR=rmqnamesrv:9876
+      # Optional: reduce memory so broker doesn't OOM on small machines
+      - JAVA_OPT_EXT=-Xms512m -Xmx512m
+    # Linux: host.docker.internal is not defined by default; host-gateway = host IP so any machine works
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    command: sh mqbroker --enable-proxy -c /home/rocketmq/rocketmq-5.1.4/conf/broker.conf
+    volumes:
+      - ./rmq/broker.conf:/home/rocketmq/rocketmq-5.1.4/conf/broker.conf
+
+  rmq-dashboard:
+    # RocketMQ Console: NameServer + bind to 0.0.0.0 so port mapping works
+    image: styletang/rocketmq-console-ng:latest
+    container_name: rmqdashboard
+    ports:
+      - "8082:8080"
+    environment:
+      - JAVA_OPTS=-Drocketmq.namesrv.addr=rmqnamesrv:9876 -Dcom.rocketmq.sendMessageWithVIPChannel=false -Dserver.address=0.0.0.0 -Dserver.port=8080
+      - SERVER_ADDRESS=0.0.0.0
+      - SERVER_PORT=8080
+    # Linux: resolve host.docker.internal so dashboard can connect to broker (broker advertises host.docker.internal:10911)
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    depends_on:
+      - namesrv
+      - broker
+    restart: unless-stopped
+
+
   tracker-app:
     build:
       context: .
@@ -44,12 +97,18 @@ services:
     container_name: bet-app
     depends_on:
       - kafka
+      - namesrv
+      - broker
     ports:
       - "8080:8080"
     environment:
-      # O App DENTRO do docker usa a porta INTERNAL
+      # App dentro do Docker: usa nomes dos serviços na rede interna
       SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:29092
       SPRING_DATASOURCE_URL: jdbc:h2:mem:betdb
+      # RocketMQ: NameServer pelo nome do serviço (não 127.0.0.1)
+      ROCKETMQ_NAME_SERVER: namesrv:9876
+      # Força app.rocketmq.enabled=true para o bean RocketMQBetSettlementProducer ser criado (JVM garante que a propriedade chegue)
+      JAVA_OPTS: "-Dapp.rocketmq.enabled=true"
 
 #  sonarqube:
 #    image: sonarqube:community

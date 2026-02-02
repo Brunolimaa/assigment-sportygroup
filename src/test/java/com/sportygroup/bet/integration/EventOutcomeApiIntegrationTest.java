@@ -3,6 +3,7 @@ package com.sportygroup.bet.integration;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sportygroup.bet.infrastructure.messaging.EventOutcomesKafkaConsumer;
 import com.sportygroup.bet.infrastructure.messaging.KafkaEventOutcomePublisher;
+import org.apache.rocketmq.spring.core.RocketMQTemplate;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,7 +26,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK)
 @AutoConfigureMockMvc
 @TestPropertySource(properties = {
-        "spring.autoconfigure.exclude=org.springframework.boot.autoconfigure.kafka.KafkaAutoConfiguration"
+        "spring.autoconfigure.exclude[0]=org.springframework.boot.autoconfigure.kafka.KafkaAutoConfiguration",
+        "spring.autoconfigure.exclude[1]=org.apache.rocketmq.spring.autoconfigure.RocketMQAutoConfiguration",
+        "app.rocketmq.enabled=true"
 })
 @DisplayName("Event Outcome API Integration")
 class EventOutcomeApiIntegrationTest {
@@ -41,6 +44,9 @@ class EventOutcomeApiIntegrationTest {
 
     @MockitoBean
     private EventOutcomesKafkaConsumer eventOutcomesKafkaConsumer;
+
+    @MockitoBean
+    private RocketMQTemplate rocketMQTemplate;
 
     @Test
     @DisplayName("POST /api/event-outcomes returns 202 Accepted")

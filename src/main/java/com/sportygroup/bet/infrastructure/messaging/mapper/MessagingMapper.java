@@ -1,6 +1,8 @@
 package com.sportygroup.bet.infrastructure.messaging.mapper;
 
+import com.sportygroup.bet.domain.BetSettlement;
 import com.sportygroup.bet.domain.EventOutcome;
+import com.sportygroup.bet.infrastructure.messaging.payload.BetSettlementPayload;
 import com.sportygroup.bet.infrastructure.messaging.payload.EventOutcomePayload;
 import org.mapstruct.Mapper;
 
@@ -8,4 +10,5 @@ import org.mapstruct.Mapper;
 public interface MessagingMapper {
   EventOutcomePayload toPayload(EventOutcome domain);
   EventOutcome toDomain(EventOutcomePayload payload);
+  BetSettlementPayload toPayload(BetSettlement betSettlement);
 }
