@@ -1,5 +1,6 @@
 package com.sportygroup.bet.infrastructure.messaging;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sportygroup.bet.application.port.in.HandleEventOutcomeUseCase;
 import com.sportygroup.bet.domain.EventOutcome;
@@ -8,6 +9,7 @@ import com.sportygroup.bet.infrastructure.messaging.payload.EventOutcomePayload;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.kafka.annotation.KafkaListener;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.support.KafkaHeaders;
 import org.springframework.messaging.handler.annotation.Header;
 import org.springframework.messaging.handler.annotation.Payload;
@@ -21,11 +23,13 @@ public class EventOutcomesKafkaConsumer {
     private final HandleEventOutcomeUseCase handleEventOutcomeUseCase;
     private final ObjectMapper objectMapper;
     private final MessagingMapper messagingMapper;
+    private final KafkaTemplate<String, String> kafkaTemplate;
 
-    public EventOutcomesKafkaConsumer(HandleEventOutcomeUseCase handleEventOutcomeUseCase, ObjectMapper objectMapper, MessagingMapper messagingMapper) {
+    public EventOutcomesKafkaConsumer(HandleEventOutcomeUseCase handleEventOutcomeUseCase, ObjectMapper objectMapper, MessagingMapper messagingMapper, KafkaTemplate<String, String> kafkaTemplate) {
         this.handleEventOutcomeUseCase = handleEventOutcomeUseCase;
         this.objectMapper = objectMapper;
       this.messagingMapper = messagingMapper;
+      this.kafkaTemplate = kafkaTemplate;
     }
 
     @KafkaListener(
@@ -41,6 +45,9 @@ public class EventOutcomesKafkaConsumer {
         try {
             EventOutcomePayload payload = objectMapper.readValue(message, EventOutcomePayload.class);
             handleEventOutcomeUseCase.handle(messagingMapper.toDomain(payload));
+        } catch (JsonProcessingException e) {
+          log.error("Invalid JSON, sending to DLQ: {}", message, e);
+          kafkaTemplate.send("event-outcomes-dlq", message);
         } catch (Exception e) {
             log.error("Failed to process event outcome: {}", message, e);
             throw new RuntimeException("Event outcome processing failed", e);
