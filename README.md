@@ -135,7 +135,7 @@ http://localhost:8081/
 ```
 To see the messages you can find them in these menus: 
 
-##### Topics > Topic Name "sports-live-ipdates" > Messages
+##### Topics > Topic Name "event-outcomes" > Messages
 
 ![img_1.png](img_1.png)
 
