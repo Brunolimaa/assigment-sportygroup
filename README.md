@@ -153,7 +153,7 @@ http://localhost:8082/
 
 It’s a simple project; however, I decided to use Hexagonal Architecture as the architectural approach.
 By using this architecture, it’s possible to isolate the domain and application code, applying the Open/Closed Principle more easily.
-For this project, it would have been simpler, of course, to use an MVC architecture, but I chose Clean Architecture to better organize the layers and responsibilities.
+For this project, it would have been simpler, of course, to use an MVC architecture, but I chose Hexagonal Architecture to better organize the layers and responsibilities.
 
 - According to this image, we can see how this architecture works 
 
