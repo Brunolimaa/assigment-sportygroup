@@ -10,7 +10,7 @@ This is a simple backend service built using Java 17, Spring Boot 3 and Kafka as
 
 **Architecture / sequence diagrams**
 
-- High-level diagram: [sportygroup-seq-diagram.svg](./sportygroup-fundo.svg)
+- High-level diagram: [sportygroup-seq-diagram.svg](./sportygroup-seq-diagram.svg)
 
 <div style="background-color: white; padding: 15px; border-radius: 8px;">
     <img src="./sportygroup-seq-diagram.svg" alt="sequence diagram" width="100%">
