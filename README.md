@@ -8,8 +8,12 @@ This is a simple backend service built using Java 17, Spring Boot 3 and Kafka as
 - **Message**: The message broker is built using kafka to publish messages to a topic
 - **Database**: H2 In-Memory Database
 
+**Architecture / sequence diagrams**
+
+- High-level diagram: [sportygroup-seq-diagram.svg](./sportygroup-fundo.svg)
+
 <div style="background-color: white; padding: 15px; border-radius: 8px;">
-    <img src="./sportygroup-fundo.svg" alt="Diagrama de Sequência" width="100%">
+    <img src="./sportygroup-seq-diagram.svg" alt="sequence diagram" width="100%">
 </div>
 
 ## Requirements
@@ -118,7 +122,7 @@ docker logs -f bet-app
 2026-01-30T21:42:48.238Z  INFO 1 --- [bet] [ bet-producer-1] o.a.k.c.p.internals.TransactionManager   : [Producer clientId=bet-producer-1] ProducerId set to 6 with epoch 0
 2026-01-30T21:42:48.380Z  INFO 1 --- [bet] [-consumer-0-C-1] c.s.b.i.m.EventOutcomesKafkaConsumer     : Received event outcome from Kafka: topic=event-outcomes, offset=10, payload={"eventId":"event-123","eventName":"Final da Champions League: Real Madrid vs Dortmund","eventWinnerId":"winner-789"}
 2026-01-30T21:42:49.171Z  INFO 1 --- [bet] [-consumer-0-C-1] c.s.b.a.s.HandleEventOutcomeService      : [Settlement] Processing results for event event-123: 1 total bets, 1 winners found.
-2026-01-30T21:42:49.175Z  INFO 1 --- [bet] [-consumer-0-C-1] .b.i.m.MockRocketMQBetSettlementProducer : [Mock RocketMQ] Would send to topic 'bet-settlements': {"betId":"bet-998877","userId":"user-456","eventId":"event-123","eventMarketId":"market-001","eventWinnerId":"winner-789","betAmount":"50.00","won":true}
+2026-01-30T21:42:49.175Z  INFO 1 --- [bet] [-consumer-0-C-1] c.s.b.i.m.RocketMQBetSettlementProducer   : Successfully sent settlement to RocketMQ: betId=bet-998877
 
 ```
 
@@ -135,17 +139,25 @@ To see the messages you can find them in these menus:
 
 ![img_1.png](img_1.png)
 
+#### 5. UI for RocketMQ
+
+![img_2.png](img_2.png)
+
+To access the UI you need to access this link:
+
+```
+http://localhost:8082/
+```
+
 ## Design decisions
 
-It’s a simple project; however, I decided to use Clean Architecture as the architectural approach.
+It’s a simple project; however, I decided to use Hexagonal Architecture as the architectural approach.
 By using this architecture, it’s possible to isolate the domain and application code, applying the Open/Closed Principle more easily.
 For this project, it would have been simpler, of course, to use an MVC architecture, but I chose Clean Architecture to better organize the layers and responsibilities.
 
 - According to this image, we can see how this architecture works 
 
-![image](https://github.com/user-attachments/assets/e540df2d-a39d-4103-9074-3e19ba0d5687)
-
-
+![img_5.png](img_5.png)
 
 To handle centralized exceptions, I used AOP (Aspect-Oriented Programming) through @ControllerAdvice or @ExceptionHandler.
 
