@@ -5,7 +5,7 @@ This is a simple backend service built using Java 17, Spring Boot 3 and Kafka as
 
 - **Back-end**: The backend is built using Java 17.
 - **API**: The service is built using Spring Boot 3
-- **Message**: The message broker is built using kafka to publish messages to a topic
+- **Message**: The message broker is built using kafka and RocketMQ to publish messages to a topic
 - **Database**: H2 In-Memory Database
 
 **Architecture / sequence diagrams**
